@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>道高易安</title>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<style type="text/css" media="screen">
+		html {
+			height: 100%;
+			width: 100%;
+		}
+		#map {
+			position: absolute;
+			left: 0;
+			height: 100%;
+			width: 100vw;
+		}
+		#body {
+			height: 100%;
+			width: 100vw;
+			position: relative;
+			top: 0;
+			left: 0;
+		}
+	
+		h1,
+		h2 {
+			text-align: center;
+		}
+	
+		</style>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOArSX-mQHbwuDUn1H5H2AUb8sFk1CpdY"></script>
+	
+	<script>
+		function initMap() {
+			// 定義地圖的中心位置
+			var mapCenter = {lat: 25.0336719, lng: 121.564427};
+
+			// 建立地圖
+			var map = new google.maps.Map(document.getElementById('map'), {
+				zoom: 8,
+				center: mapCenter
+			});
+			const trafficLayer = new google.maps.TrafficLayer();//路況
+
+			trafficLayer.setMap(map);
+		   
+			/*const bikeLayer = new google.maps.BicyclingLayer();//自行車道
+		  
+		  	bikeLayer.setMap(map);*/
+			// 載入JSON資料
+			fetch('data.json')
+			  .then(response => response.json())
+			  .then(data => {
+			    data.forEach(item => {
+			      // 取得每一個地點的座標
+			      var location = {lat: item.lat, lng: item.lng};
+				  var image ='其他.png'
+					if(item.roadtype =='道路施工')
+					image = '道路施工.png'
+						else if(item.roadtype =='交通障礙')	
+					    image = '交通障礙.png'
+						else if(item.roadtype =='事故')
+						image = '事故.png'
+				   // 選擇圖示
+				   var icon = {
+					
+			        url: image,
+			        scaledSize: new google.maps.Size(50, 50),
+					anchor: new google.maps.Point(0, 0),
+					fillOpacity: 1.0
+			      };
+
+				   
+
+			      // 在地圖上標記每一個地點
+			      var marker = new google.maps.Marker({
+			        position: location,
+			        map: map,
+			        title: item.name ,
+					icon: icon
+			      });
+
+			      // 建立InfoWindow物件
+			      var infoWindow = new google.maps.InfoWindow({
+			        content: `<h3>${item.roadtype}</h3>
+					<p>地點：${item.areaNm}</p>
+					<p>發生時間：${item.modDttm}</p>
+					<p>方向：${item.direction}</p>
+					<p>概況說明：${item.comment}</p>
+					
+					`
+			      });
+
+			      // 在標記上添加點擊事件
+			      marker.addListener('click', function() {
+			        infoWindow.open(map, marker);
+			      });
+			    });
+			  });
+		}
+	</script>
+</head>
+<body onload="initMap()">
+	
+	<div id="map" ></div>
+</body>
+</html>
